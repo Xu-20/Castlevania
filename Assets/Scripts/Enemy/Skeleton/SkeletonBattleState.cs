@@ -19,6 +19,10 @@ public class SkeletonBattleState : EnemyState
     {
         base.Enter();
         player = PlayerManager.instance.player.transform;
+        if (player.GetComponent<PlayerStats>().isDead)
+        {
+            stateMachine.ChangeState(enemy.moveState);
+        }
     }
 
     // 退出战斗状态时执行的逻辑
@@ -35,12 +39,12 @@ public class SkeletonBattleState : EnemyState
         {
             stateTimer = enemy.battleTime;
             float distanceToPlayer = Vector2.Distance(enemy.transform.position, player.position);
-            
+
             // 新增：当距离小于攻击距离时停止移动
-            if (distanceToPlayer < enemy.attackDistance - 0.3f) 
+            if (distanceToPlayer < enemy.attackDistance - 0.3f)
             {
                 enemy.SetZeroVelocity();
-                 stateMachine.ChangeState(enemy.attackState);
+                stateMachine.ChangeState(enemy.attackState);
                 return;
             }
 
@@ -78,6 +82,7 @@ public class SkeletonBattleState : EnemyState
     {
         if (Time.time >= enemy.lastTimeAttacked + enemy.attackCooldown)
         {
+            enemy.attackCooldown = Random.Range(enemy.minAttackCooldown, enemy.maxAttackCooldown);
             enemy.lastTimeAttacked = Time.time;
             return true;
         }

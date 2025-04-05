@@ -33,6 +33,8 @@ public class Checkpoint : MonoBehaviour
 
     public void ActivateCheckPoint()//激活检查点
     {
+        if (activationStatus == false)//如果检查点已经激活
+            AudioManager.instance.PlaySFX(5, transform);//播放音效
 
         activationStatus = true;
         anim.SetBool("active", true);

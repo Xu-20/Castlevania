@@ -29,7 +29,7 @@ public class PlayerAirState : PlayerState
         {
             stateMachine.ChangeState(player.wallSlideState);
         }
-        
+
         if (xInput != 0)
         {
             player.SetVelocity(player.moveSpeed * 0.8f * xInput, rb.velocity.y);

@@ -15,7 +15,7 @@ public class Entity : MonoBehaviour
     #endregion
 
     [Header("Knockback")]
-    [SerializeField] protected Vector2 knockbackDirection;
+    [SerializeField] protected Vector2 knockbackPower;
     [SerializeField] protected float knockbackDurtion;
     protected bool isKnocked;
 
@@ -27,6 +27,8 @@ public class Entity : MonoBehaviour
     [SerializeField] protected Transform wallCheck;
     [SerializeField] protected float wallCheckDistance;
     [SerializeField] protected LayerMask isGround;
+
+    public int konkcbackDir { get; private set; }
     public int facingDir { get; private set; } = 1;
     private bool facingRight = true;
     public System.Action onFlipped;//一个自身不用写函数，只是接受其他函数并调用他们的函数
@@ -71,14 +73,35 @@ public class Entity : MonoBehaviour
     }
     #endregion
 
+
+    public virtual void SetupKnockbackDir(Transform _damageDirection)
+    {
+        if (_damageDirection.position.x > transform.position.x)
+        {
+            konkcbackDir = -1;
+        }
+        else if (_damageDirection.position.x < transform.position.x)
+        {
+            konkcbackDir = 1;
+        }
+    }
+
+    public void SetKnockbackPower(Vector2 _knockbackPower) => knockbackPower = _knockbackPower;
+
+
     protected virtual IEnumerator HitKnockback()
     {
         isKnocked = true;
 
-        rb.velocity = new Vector2(knockbackDirection.x * -facingDir, knockbackDirection.y);
+        rb.velocity = new Vector2(knockbackPower.x * konkcbackDir, knockbackPower.y);
 
         yield return new WaitForSeconds(knockbackDurtion);
         isKnocked = false;
+        SetupZeroKnockbackPower();
+    }
+    protected virtual void SetupZeroKnockbackPower()
+    {
+
     }
 
     #region Velocity
@@ -116,7 +139,7 @@ public class Entity : MonoBehaviour
             Flip();
     }
     #endregion
-  
+
     public virtual void Die()
     {
 

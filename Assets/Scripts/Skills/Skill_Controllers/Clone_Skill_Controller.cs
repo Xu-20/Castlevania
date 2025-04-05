@@ -75,6 +75,7 @@ public class Clone_Skill_Controller : MonoBehaviour
             if (hit.GetComponent<Enemy>() != null)
             {
                 //player.stats.DoDamage(hit.GetComponent<CharacterStats>());
+                hit.GetComponent<Entity>().SetupKnockbackDir(transform);
 
                 PlayerStats playerStats = player.GetComponent<PlayerStats>();//获取玩家的stats
                 EnemyStats enemyStats = hit.GetComponent<EnemyStats>(); //获取敌人的stats

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class UI : MonoBehaviour
+public class UI : MonoBehaviour, ISaveManager
 {
     [Header("End screens")]
     [SerializeField] private UI_FadeScreen fadeScreen;
@@ -23,6 +23,8 @@ public class UI : MonoBehaviour
     public UI_StatToolTip statToolTip;
     public UI_CraftWindow craftWindow;
     public UI_SkillToolTip skillToolTip;
+
+    [SerializeField] private UI_VolumeSlider[] volumeSlider;
 
     private void Awake()
     {
@@ -68,7 +70,20 @@ public class UI : MonoBehaviour
 
         if (_menu != null)
         {
+            AudioManager.instance.PlaySFX(7, null);
             _menu.SetActive(true);
+        }
+
+        if (GameManager.instance != null)
+        {
+            if (_menu == inGameUI)
+            {
+                GameManager.instance.PauseGame(false);
+            }
+            else
+            {
+                GameManager.instance.PauseGame(true);
+            }
         }
     }
     public void SwitchWithKeyTo(GameObject _menu)
@@ -107,4 +122,27 @@ public class UI : MonoBehaviour
     }
 
     public void RestartGameButton() => GameManager.instance.RestartScene();
+
+    public void LoadData(GameData _data)
+    {
+        foreach (KeyValuePair<string, float> pair in _data.volumeSettings)
+        {
+            foreach (UI_VolumeSlider item in volumeSlider)
+            {
+                if (item.parametr == pair.Key)
+                {
+                    item.LoadSlider(pair.Value);
+                }
+            }
+        }
+    }
+
+    public void SaveData(ref GameData _data)
+    {
+        _data.volumeSettings.Clear();
+        foreach (UI_VolumeSlider item in volumeSlider)
+        {
+            _data.volumeSettings.Add(item.parametr, item.slider.value);
+        }
+    }
 }

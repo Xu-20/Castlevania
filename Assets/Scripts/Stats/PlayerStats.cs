@@ -23,6 +23,13 @@ public class PlayerStats : CharacterStats
     {
         if (isDead)
             return;
+        if (_damage > GetMaxHealthValue() * .3f)
+        {
+            player.SetKnockbackPower(new Vector2(7, 10));
+
+            int randomSound = Random.Range(31, 35);
+            AudioManager.instance.PlaySFX(randomSound, null);
+        }
 
         int originalDamage = _damage;
         ItemData_Equipment armor = null;

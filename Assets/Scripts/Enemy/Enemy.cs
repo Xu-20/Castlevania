@@ -22,7 +22,8 @@ public class Enemy : Entity
     [Header("攻击")]
     public float attackDistance;
     public float attackCooldown;
-    [SerializeField] private float damage; // Add this line to define damage
+    public float minAttackCooldown;
+    public float maxAttackCooldown;
     [HideInInspector] public float lastTimeAttacked;
     public EnemyStateMachine stateMachine { get; private set; }
 
@@ -115,7 +116,7 @@ public class Enemy : Entity
             PlayerStats playerStats = player.GetComponent<PlayerStats>();
             if (playerStats != null)
             {
-                playerStats.TakeDamage(stats.damage.GetValue());
+                playerStats.TakeDamage(CalculateTotalDamage());
             }
         }
     }

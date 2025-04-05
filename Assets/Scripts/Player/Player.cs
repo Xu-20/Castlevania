@@ -78,7 +78,13 @@ public class Player : Entity
 
     protected override void Update()
     {
+        if (Time.timeScale == 0)
+        {
+            return;
+        }
+
         base.Update();
+
         stateMachine.currentState.Update();
 
         checkForDashInput();
@@ -158,5 +164,9 @@ public class Player : Entity
     {
         base.Die();
         stateMachine.ChangeState(deadState);
+    }
+    protected override void SetupZeroKnockbackPower()
+    {
+        knockbackPower = new Vector2(0, 0);
     }
 }

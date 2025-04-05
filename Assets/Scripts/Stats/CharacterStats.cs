@@ -70,6 +70,7 @@ public class CharacterStats : MonoBehaviour
     public System.Action onHealthChanged;  // 生命值改变事件，用于更新UI
 
     public bool isDead { get; protected set; }
+    public bool isInvincible { get; protected set; }
     private bool isVulnerable;
 
     // 初始化方法，在游戏开始时设置默认值并初始化当前生命值
@@ -137,6 +138,7 @@ public class CharacterStats : MonoBehaviour
 
         if (TargetCanAvoidAttack(_targetStats))
             return;
+        _targetStats.GetComponent<Entity>().SetupKnockbackDir(transform);
 
         int totalDamage = damage.GetValue() + strength.GetValue();
 
@@ -308,8 +310,11 @@ public class CharacterStats : MonoBehaviour
     {
         if (isDead)
             return;
+        if (isInvincible)
+            return;
 
         DecreaseHealthBy(_damage, true);
+
     }
 
     // 统一的生命值减少方法
@@ -363,6 +368,14 @@ public class CharacterStats : MonoBehaviour
         // 在这里添加死亡时的清理逻辑
         enabled = false;
     }
+    public void KillEntity()
+    {
+        if (!isDead)
+            Die();
+    }
+    public void MakeInvincible(bool _invincible) => isInvincible = _invincible;
+
+
     #region Stat calculation
     // 检查目标角色的护甲并计算最终伤害
     protected int CheckTargetArmor(CharacterStats _targetStats, int totleDamage)

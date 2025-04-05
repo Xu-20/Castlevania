@@ -21,7 +21,10 @@ public class PlayerWallSlideState : PlayerState
     public override void Update()
     {
         base.Update();
-         // 确保只有在按住朝向墙壁的方向时才能蹬墙跳
+        if (player.IsWallDetected() == false)
+            stateMachine.ChangeState(player.airState);
+
+        // 确保只有在按住朝向墙壁的方向时才能蹬墙跳
         if (Input.GetKeyDown(KeyCode.Space) && xInput == player.facingDir)
         {
             stateMachine.ChangeState(player.wallJumpState);
@@ -32,10 +35,10 @@ public class PlayerWallSlideState : PlayerState
             stateMachine.ChangeState(player.idleState);
 
         if (yInput < 0)
-           rb.velocity= new Vector2(0, rb.velocity.y);
+            rb.velocity = new Vector2(0, rb.velocity.y);
         else
-           rb.velocity =new Vector2(0,rb.velocity.y * 0.5f);
-        
+            rb.velocity = new Vector2(0, rb.velocity.y * 0.5f);
+
 
         if (player.IsGroundDetected())
         {
