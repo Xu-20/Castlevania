@@ -15,17 +15,17 @@ public class Sword_Skill_Controller : MonoBehaviour
     private float freezeTimeDuration;
     private float returnSpeed;
 
-    [Header("���̽�")]
-    [SerializeField] private float pierceAmount;
+    [Header("Pierce info")]
+    private float pierceAmount;
 
-    [Header("����")]
+    [Header("Bounce info")]
     private float bounceSpeed;
     private bool isBouncing;
     private int bounceAmount;
     private List<Transform> enemyTarget;
     private int targetIndex;
 
-    [Header("��ת")]
+    [Header("Spin info")]
     private float maxTravelDistance;
     private float spinDuration;
     private float spinTimer;
@@ -163,7 +163,7 @@ public class Sword_Skill_Controller : MonoBehaviour
             {
                 SwordSkillDamage(enemyTarget[targetIndex].GetComponent<Enemy>());
                 enemyTarget[targetIndex].GetComponent<Enemy>().DamageImpact();
-                enemyTarget[targetIndex].GetComponent<Enemy>().StartCoroutine("FreezeTimerFor", freezeTimeDuration);
+                enemyTarget[targetIndex].GetComponent<Enemy>().StartCoroutine("FreezeTimeFor", freezeTimeDuration);
 
                 targetIndex++;
                 bounceAmount--;
@@ -249,7 +249,7 @@ public class Sword_Skill_Controller : MonoBehaviour
 
         rb.isKinematic = true;
         rb.constraints = RigidbodyConstraints2D.FreezeAll;
-
+        GetComponentInChildren<ParticleSystem>().Play();
         if (isBouncing && enemyTarget.Count > 0)
             return;
 

@@ -20,6 +20,15 @@ public enum StatType
     lightningDamage
 }
 
+public enum DamageType
+{
+    Physical,
+    Fire,
+    Ice,
+    Lightning,
+    Heal
+}
+
 // 角色状态类，用于管理角色的属性和生命值
 public class CharacterStats : MonoBehaviour
 {
@@ -126,7 +135,7 @@ public class CharacterStats : MonoBehaviour
     // 计算并施加伤害给目标角色
     public virtual void DoDamage(CharacterStats _targetStats)
     {
-        if (_targetStats == null)
+        if (_targetStats == null || _targetStats.isDead)
             return;
 
         // 如果目标是玩家，设置伤害来源
@@ -141,15 +150,20 @@ public class CharacterStats : MonoBehaviour
         _targetStats.GetComponent<Entity>().SetupKnockbackDir(transform);
 
         int totalDamage = damage.GetValue() + strength.GetValue();
+        bool isCritical = false;
 
         //爆伤设置
         if (Cancrit())
         {
             totalDamage = CalculateCriticalDamage(totalDamage);
+            isCritical = true;
         }
-        totalDamage = CheckTargetArmor(_targetStats, totalDamage);
+        // 计算暴击伤害动画
+        fx.CreateFitFx(_targetStats.transform, isCritical);
 
-        _targetStats.TakeDamage(totalDamage);
+        // 直接调用统一伤害处理方法
+        _targetStats.DecreaseHealthBy(totalDamage, true, DamageType.Physical, isCritical);
+
         DoMagicDamage(_targetStats);
     }
 
@@ -157,7 +171,7 @@ public class CharacterStats : MonoBehaviour
 
     public virtual void DoMagicDamage(CharacterStats _targetStats)
     {
-        if (_targetStats == null)
+        if (_targetStats == null || _targetStats.isDead)
             return;
 
         // 如果目标是玩家，设置伤害来源
@@ -171,16 +185,22 @@ public class CharacterStats : MonoBehaviour
         int _iceDamage = iceDamage.GetValue();
         int _lightningDamage = lightningDamage.GetValue();
 
-        int totleDamage = _fireDamage + _iceDamage + _lightningDamage + intelligence.GetValue();
+        int totalDamage = _fireDamage + _iceDamage + _lightningDamage + intelligence.GetValue();
 
-        totleDamage = CheckTargetResistance(_targetStats, totleDamage);
-        _targetStats.TakeDamage(totleDamage);
+        // 直接调用统一伤害处理方法
+        _targetStats.DecreaseHealthBy(totalDamage, true, GetHighestDamageType(_fireDamage, _iceDamage, _lightningDamage));
 
         if (Mathf.Max(_fireDamage, _iceDamage, _lightningDamage) <= 0)
             return;
 
         AttemptToApplyAilements(_targetStats, _fireDamage, _iceDamage, _lightningDamage);
 
+    }
+    private DamageType GetHighestDamageType(int fire, int ice, int lightning)
+    {
+        if (fire >= ice && fire >= lightning) return DamageType.Fire;
+        if (ice >= fire && ice >= lightning) return DamageType.Ice;
+        return DamageType.Lightning;
     }
 
     private void AttemptToApplyAilements(CharacterStats _targetStats, int _fireDamage, int _iceDamage, int _lightningDamage)
@@ -308,9 +328,7 @@ public class CharacterStats : MonoBehaviour
     // 角色受到伤害时调用的方法
     public virtual void TakeDamage(int _damage)
     {
-        if (isDead)
-            return;
-        if (isInvincible)
+        if (isDead || isInvincible)
             return;
 
         DecreaseHealthBy(_damage, true);
@@ -318,17 +336,25 @@ public class CharacterStats : MonoBehaviour
     }
 
     // 统一的生命值减少方法
-    protected virtual void DecreaseHealthBy(int _damage, bool _showImpact = false)
+    protected virtual void DecreaseHealthBy(int _damage, bool showImpact = false, DamageType damageType = DamageType.Physical, bool isCritical = false)
     {
         if (isDead)
+            return;
+
+        if (isInvincible)
             return;
         if (isVulnerable)
             _damage = Mathf.RoundToInt(_damage * 1.1f);
 
         currentHealth -= _damage;
 
+        if (_damage > 0)
+        {
+            fx.CreatePopUpText(_damage.ToString(), damageType, isCritical);
+        }
+
         // 只在需要时显示受击效果
-        if (_showImpact)
+        if (showImpact)
         {
             Entity entity = GetComponent<Entity>();
             if (entity != null)
@@ -353,6 +379,9 @@ public class CharacterStats : MonoBehaviour
         currentHealth += _amount;
         if (currentHealth > GetMaxHealthValue())
             currentHealth = GetMaxHealthValue();
+
+        fx.CreatePopUpText("+" + _amount.ToString(), DamageType.Heal);
+
         if (onHealthChanged != null)
             onHealthChanged();
     }

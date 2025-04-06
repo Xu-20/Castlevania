@@ -14,12 +14,14 @@ public class PlayerCatchSwordState : PlayerState
         base.Enter();
 
         sword = player.sword.transform;
+        player.fX.PlayDustFx();
+        player.fX.ScreenShake(player.fX.shakeSwordImpact);
 
         if (player.transform.position.x > sword.position.x && player.facingDir == 1)
             player.Flip();
         else if (player.transform.position.x < sword.position.x && player.facingDir == -1)
             player.Flip();
-        rb.velocity = new Vector2(player.swordReturnImpact * -player.facingDir,rb.velocity.y);
+        rb.velocity = new Vector2(player.swordReturnImpact * -player.facingDir, rb.velocity.y);
     }
 
     public override void Exit()
@@ -31,7 +33,7 @@ public class PlayerCatchSwordState : PlayerState
     public override void Update()
     {
         base.Update();
-        if(triggerCalled)
+        if (triggerCalled)
             stateMachine.ChangeState(player.idleState);
     }
 }

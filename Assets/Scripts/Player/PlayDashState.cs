@@ -40,5 +40,6 @@ public class PlayDashState : PlayerState
         {
             stateMachine.ChangeState(player.idleState);
         }
+        player.fX.CreateAfterImage();
     }
 }

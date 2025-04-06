@@ -24,7 +24,10 @@ public class PlayGroundedState : PlayerState
         if (Input.GetKeyDown(KeyCode.R) && player.skill.blackhole.blackHoleUnlocked)
         {
             if (player.skill.blackhole.cooldownTimer > 0)
+            {
+                player.fX.CreatePopUpText("Cooldown");
                 return;
+            }
             stateMachine.ChangeState(player.blackhole);
         }
         if (Input.GetKeyDown(KeyCode.Mouse1) && HasNoSword() && player.skill.sword.swordUnlocked)
